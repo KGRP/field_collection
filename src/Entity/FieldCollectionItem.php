@@ -146,7 +146,7 @@ class FieldCollectionItem extends ContentEntityBase implements FieldCollectionIt
    *   and therefore no link is created between the host and the item or
    *   revision updates might be skipped. Use with care.
    */
-  public function save($skip_host_save = FALSE) {
+  public function save($skip_host_save = TRUE) {
     /* TODO: Need this.
     // Make sure we have a host entity during creation.
     if (!empty($this->is_new) && !(isset($this->hostEntityId) || isset($this->hostEntity) || isset($this->hostEntityRevisionId))) {
