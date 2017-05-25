@@ -62,4 +62,17 @@ interface FieldCollectionItemInterface extends ContentEntityInterface {
    */
   public function isEmpty();
 
+  /**
+   * Set a flag that works same as the $skip_host_save parameter to
+   * FieldCollectionItem::save().
+   *
+   * @see: FieldCollectionItem::save()
+   *
+   * @param $bool
+   *   If TRUE is passed, the next call to FieldCollectionItem::save() will not
+   *   save the host entity and therefore no link will be created between the
+   *   item and the host and the item or revision updates might be skipped.
+   *   Use with care.
+   */
+  public function skipHostCheck($bool);
 }

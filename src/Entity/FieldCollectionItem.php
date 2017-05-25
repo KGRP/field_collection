@@ -56,6 +56,17 @@ class FieldCollectionItem extends ContentEntityBase implements FieldCollectionIt
   // TODO: Should references to $this->host_type (a base field) use a getter?
 
   /**
+   * A flag that acts same as the $skip_host_save parameter to FieldCollectionItem::save().
+   *
+   * Automatically resets back to FALSE after first call to FieldCollectionItem::save().
+   *
+   * @see: FieldCollectionItem::save()
+   *
+   * @var bool
+   */
+  protected $skip_host_check;
+  
+  /**
    * The id of the host entity.
    *
    * TODO: Possibly convert it to a FieldInterface.
@@ -69,6 +80,13 @@ class FieldCollectionItem extends ContentEntityBase implements FieldCollectionIt
     return $this->item_id->value;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function skipHostCheck($bool) {
+    $this->skip_host_check = $bool;
+  }
+  
   /**
    * Overrides \Drupal\Core\Entity\label().
    */
@@ -152,7 +170,7 @@ class FieldCollectionItem extends ContentEntityBase implements FieldCollectionIt
     // Only save directly if we are told to skip saving the host entity. Else,
     // we always save via the host as saving the host might trigger saving
     // field collection items anyway (e.g. if a new revision is created).
-    if ($skip_host_save) {
+    if ($skip_host_save || $this->skip_host_check) {
       return parent::save();
     }
     else {

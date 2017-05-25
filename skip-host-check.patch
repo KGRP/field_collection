@@ -1,0 +1,82 @@
+diff --git a/src/Entity/FieldCollectionItem.php b/src/Entity/FieldCollectionItem.php
+index 5364ec0..e62ad05 100644
+--- a/src/Entity/FieldCollectionItem.php
++++ b/src/Entity/FieldCollectionItem.php
+@@ -56,6 +56,17 @@ class FieldCollectionItem extends ContentEntityBase implements FieldCollectionIt
+   // TODO: Should references to $this->host_type (a base field) use a getter?
+ 
+   /**
++   * A flag that acts same as the $skip_host_save parameter to FieldCollectionItem::save().
++   *
++   * Automatically resets back to FALSE after first call to FieldCollectionItem::save().
++   *
++   * @see: FieldCollectionItem::save()
++   *
++   * @var bool
++   */
++  protected $skip_host_check;
++  
++  /**
+    * The id of the host entity.
+    *
+    * TODO: Possibly convert it to a FieldInterface.
+@@ -70,6 +81,13 @@ class FieldCollectionItem extends ContentEntityBase implements FieldCollectionIt
+   }
+ 
+   /**
++   * {@inheritdoc}
++   */
++  public function skipHostCheck($bool) {
++    $this->skip_host_check = $bool;
++  }
++  
++  /**
+    * Overrides \Drupal\Core\Entity\label().
+    */
+   public function label() {
+@@ -152,7 +170,7 @@ class FieldCollectionItem extends ContentEntityBase implements FieldCollectionIt
+     // Only save directly if we are told to skip saving the host entity. Else,
+     // we always save via the host as saving the host might trigger saving
+     // field collection items anyway (e.g. if a new revision is created).
+-    if ($skip_host_save) {
++    if ($skip_host_save || $this->skip_host_check) {
+       return parent::save();
+     }
+     else {
+diff --git a/src/FieldCollectionItemInterface.php b/src/FieldCollectionItemInterface.php
+index 69c44ea..7753a8a 100644
+--- a/src/FieldCollectionItemInterface.php
++++ b/src/FieldCollectionItemInterface.php
+@@ -62,4 +62,17 @@ interface FieldCollectionItemInterface extends ContentEntityInterface {
+    */
+   public function isEmpty();
+ 
++  /**
++   * Set a flag that works same as the $skip_host_save parameter to
++   * FieldCollectionItem::save().
++   *
++   * @see: FieldCollectionItem::save()
++   *
++   * @param $bool
++   *   If TRUE is passed, the next call to FieldCollectionItem::save() will not
++   *   save the host entity and therefore no link will be created between the
++   *   item and the host and the item or revision updates might be skipped.
++   *   Use with care.
++   */
++  public function skipHostCheck($bool);
+ }
+diff --git a/src/Normalizer/FieldCollectionItemNormalizer.php b/src/Normalizer/FieldCollectionItemNormalizer.php
+index baa5ae5..dae3062 100644
+--- a/src/Normalizer/FieldCollectionItemNormalizer.php
++++ b/src/Normalizer/FieldCollectionItemNormalizer.php
+@@ -22,7 +22,9 @@ class FieldCollectionItemNormalizer extends ComplexDataNormalizer {
+    */
+   public function normalize($field_item, $format = NULL, array $context = []) {
+     // Set the normalized field output to the field collection item.
+-    $values = $this->serializer->normalize($field_item->getFieldCollectionItem(), $format, $context);
++	$fieldCollectionItem = $field_item->getFieldCollectionItem();
++	$fieldCollectionItem->skipHostCheck(TRUE);
++    $values = $this->serializer->normalize($fieldCollectionItem, $format, $context);
+ 
+     return $values;
+   }

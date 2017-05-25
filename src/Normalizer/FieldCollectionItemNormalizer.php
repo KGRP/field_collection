@@ -22,7 +22,9 @@ class FieldCollectionItemNormalizer extends ComplexDataNormalizer {
    */
   public function normalize($field_item, $format = NULL, array $context = []) {
     // Set the normalized field output to the field collection item.
-    $values = $this->serializer->normalize($field_item->getFieldCollectionItem(), $format, $context);
+	$fieldCollectionItem = $field_item->getFieldCollectionItem();
+	$fieldCollectionItem->skipHostCheck(TRUE);
+    $values = $this->serializer->normalize($fieldCollectionItem, $format, $context);
 
     return $values;
   }
